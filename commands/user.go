@@ -37,9 +37,7 @@ func PutUser(u *User) (config *configuration.Configuration, err error) {
 }
 
 func SessionPostCase(w http.ResponseWriter, r *http.Request) {
-	render := new(api.Render)
-	render.R = r
-	render.W = w
+	render := &api.Render{r, w}
 
 	var u User
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
