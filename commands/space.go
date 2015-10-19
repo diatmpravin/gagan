@@ -2,42 +2,44 @@ package commands
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/diatmpravin/gagan/api"
 	"github.com/diatmpravin/gagan/configuration"
 	"github.com/diatmpravin/gagan/models"
 	"net/http"
 )
 
-type OrganizationRepository interface {
-	FindOrganizations(config *configuration.Configuration) (orgs []models.Organization, err error)
+type SpaceRepository interface {
+	FindAllSpaces(config *configuration.Configuration) (spaces []models.Space, err error)
 }
 
-type CloudControllerOrganizationRepository struct {
+type CloudControllerSpaceRepository struct {
 }
 
-func (repo CloudControllerOrganizationRepository) FindOrganizations(config *configuration.Configuration) (orgs []models.Organization, err error) {
-	path := config.Target + "/v2/organizations"
-
+func (repo CloudControllerSpaceRepository) FindAllSpaces(config *configuration.Configuration) (spaces []models.Space, err error) {
+	path := fmt.Sprintf("%s/v2/organizations/%s/spaces", config.Target, config.Organization.Guid)
 	request, err := api.NewAuthorizedRequest("GET", path, config.AccessToken, nil)
 	if err != nil {
 		return
 	}
+
 	response := new(ApiResponse)
 
 	err = api.PerformRequestForBody(request, response)
+
 	if err != nil {
 		return
 	}
 
 	for _, r := range response.Resources {
-		orgs = append(orgs, models.Organization{r.Entity.Name, r.Metadata.Guid})
+		spaces = append(spaces, models.Space{r.Entity.Name, r.Metadata.Guid})
 	}
 
 	return
 }
 
-// ListAllOrganizations GET list of all organizations
-func ListAllOrganizations(w http.ResponseWriter, r *http.Request) {
+// ListAllSpaces Get list of all spaces
+func ListAllSpaces(w http.ResponseWriter, r *http.Request) {
 	render := &api.Render{r, w}
 
 	config := configuration.GetDefaultConfig()
@@ -45,13 +47,12 @@ func ListAllOrganizations(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	repo := CloudControllerOrganizationRepository{}
-
-	orgs, err := repo.FindOrganizations(config)
+	repo := CloudControllerSpaceRepository{}
+	spaces, err := repo.FindAllSpaces(config)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	render.JSON(orgs)
+	render.JSON(spaces)
 }
