@@ -36,8 +36,8 @@ func (repo CloudControllerOrganizationRepository) FindOrganizations(config *conf
 	return
 }
 
-// OrgPostCase handles http request and response of organization
-func OrgPostCase(w http.ResponseWriter, r *http.Request) {
+// ListAllOrganizations GET list of all organizations
+func ListAllOrganizations(w http.ResponseWriter, r *http.Request) {
 	render := &api.Render{r, w}
 
 	config := configuration.GetDefaultConfig()
