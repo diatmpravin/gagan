@@ -25,7 +25,7 @@ func (repo CloudControllerSpaceRepository) FindAllSpaces(config *configuration.C
 
 	response := new(ApiResponse)
 
-	err = api.PerformRequestForBody(request, response)
+	err = api.PerformRequestAndParseResponse(request, response)
 
 	if err != nil {
 		return
