@@ -6,6 +6,7 @@ import (
 	"github.com/diatmpravin/gagan/api"
 	"github.com/diatmpravin/gagan/configuration"
 	"github.com/diatmpravin/gagan/models"
+	"log"
 	"net/http"
 )
 
@@ -54,5 +55,6 @@ func ListAllSpaces(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("List of spaces: %+v", spaces)
 	render.JSON(spaces)
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/diatmpravin/gagan/api"
 	"github.com/diatmpravin/gagan/configuration"
 	"github.com/diatmpravin/gagan/models"
+	"log"
 	"net/http"
 )
 
@@ -53,5 +54,6 @@ func ListAllOrganizations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("List of organizations: %+v", orgs)
 	render.JSON(orgs)
 }
