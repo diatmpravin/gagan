@@ -196,3 +196,26 @@ func TestStopApplication(t *testing.T) {
 	err := repo.Stop(config, app)
 	assert.NoError(t, err)
 }
+
+var deleteApplicationEndpoint = testhelpers.CreateEndpoint(
+	"DELETE",
+	"/v2/apps/my-cool-app-guid?recursive=true",
+	nil,
+	testhelpers.TestResponse{Status: http.StatusOK, Body: ""},
+)
+
+func TestDeleteApplication(t *testing.T) {
+	ts := httptest.NewTLSServer(http.HandlerFunc(deleteApplicationEndpoint))
+	defer ts.Close()
+
+	repo := CloudControllerApplicationRepository{}
+	config := &configuration.Configuration{
+		AccessToken: "BEARER my_access_token",
+		Target:      ts.URL,
+	}
+
+	app := models.Application{Name: "my-cool-app", Guid: "my-cool-app-guid"}
+
+	err := repo.Delete(config, app)
+	assert.NoError(t, err)
+}

@@ -20,6 +20,7 @@ type ApplicationRepository interface {
 	FindByName(config *configuration.Configuration, name string) (app models.Application, err error)
 	Stop(config *configuration.Configuration, app models.Application) (err error)
 	Start(config *configuration.Configuration, app models.Application) (err error)
+	Delete(config *configuration.Configuration, app models.Application) (err error)
 }
 
 func (repo CloudControllerApplicationRepository) FindApps(config *configuration.Configuration) (apps []models.Application, err error) {
@@ -70,6 +71,17 @@ func (repo CloudControllerApplicationRepository) FindByName(config *configuratio
 	}
 
 	err = errors.New("Application not found")
+	return
+}
+
+func (repo CloudControllerApplicationRepository) Delete(config *configuration.Configuration, app models.Application) (err error) {
+	path := fmt.Sprintf("%s/v2/apps/%s?recursive=true", config.Target, app.Guid)
+	request, err := api.NewAuthorizedRequest("DELETE", path, config.AccessToken, nil)
+	if err != nil {
+		return
+	}
+
+	err = api.PerformRequest(request)
 	return
 }
 
@@ -192,4 +204,32 @@ func StartingAnApp(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("App status: %+v", app)
 	render.JSON(app)
+}
+
+// DeleteAPraticularApp will delete a partucular app
+func DeleteAPraticularApp(w http.ResponseWriter, r *http.Request) {
+	render := &api.Render{r, w}
+
+	config := configuration.GetDefaultConfig()
+	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	appname := r.URL.Query().Get("appname")
+	repo := CloudControllerApplicationRepository{}
+
+	app, err := repo.FindByName(config, appname)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	err = repo.Delete(config, app)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	res := map[string]string{"appname": appname, "message": "App deleted successfully"}
+
+	log.Printf("App status: %+v", res)
+	render.JSON(res)
 }
