@@ -108,3 +108,27 @@ func TestApplicationsFindAll(t *testing.T) {
 	app = apps[1]
 	assert.Equal(t, app.Guid, "app2-guid")
 }
+
+func TestFindByName(t *testing.T) {
+	ts := httptest.NewTLSServer(http.HandlerFunc(multipleAppsEndpoint))
+	defer ts.Close()
+
+	repo := CloudControllerApplicationRepository{}
+	config := &configuration.Configuration{
+		AccessToken: "BEARER my_access_token",
+		Target:      ts.URL,
+		Space:       models.Space{Name: "my-space", Guid: "my-space-guid"},
+	}
+
+	app, err := repo.FindByName(config, "App1")
+	assert.NoError(t, err)
+	assert.Equal(t, app.Name, "App1")
+	assert.Equal(t, app.Guid, "app1-guid")
+
+	app, err = repo.FindByName(config, "app1")
+	assert.NoError(t, err)
+	assert.Equal(t, app.Guid, "app1-guid")
+
+	app, err = repo.FindByName(config, "app that does not exist")
+	assert.Error(t, err)
+}

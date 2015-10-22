@@ -2,6 +2,7 @@ package commands
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/diatmpravin/gagan/api"
 	"github.com/diatmpravin/gagan/configuration"
@@ -16,6 +17,7 @@ type CloudControllerApplicationRepository struct {
 
 type ApplicationRepository interface {
 	FindApps(config *configuration.Configuration) (apps []models.Application, err error)
+	FindByName(config *configuration.Configuration, name string) (app models.Application, err error)
 }
 
 func (repo CloudControllerApplicationRepository) FindApps(config *configuration.Configuration) (apps []models.Application, err error) {
@@ -52,6 +54,23 @@ func (repo CloudControllerApplicationRepository) FindApps(config *configuration.
 	return
 }
 
+func (repo CloudControllerApplicationRepository) FindByName(config *configuration.Configuration, name string) (app models.Application, err error) {
+	apps, err := repo.FindApps(config)
+	if err != nil {
+		return
+	}
+
+	lowerName := strings.ToLower(name)
+	for _, a := range apps {
+		if strings.ToLower(a.Name) == lowerName {
+			return a, nil
+		}
+	}
+
+	err = errors.New("Application not found")
+	return
+}
+
 // ListAllApps GET list of all apps
 func ListAllApps(w http.ResponseWriter, r *http.Request) {
 	render := &api.Render{r, w}
@@ -69,4 +88,24 @@ func ListAllApps(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("List of all apps: %+v", apps)
 	render.JSON(apps)
+}
+
+// GetAppSummary GET details of particulat app
+func GetAppSummary(w http.ResponseWriter, r *http.Request) {
+	render := &api.Render{r, w}
+
+	config := configuration.GetDefaultConfig()
+	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	appname := r.URL.Query().Get("appname")
+	repo := CloudControllerApplicationRepository{}
+	app, err := repo.FindByName(config, appname)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	log.Printf("Detials of a app: %+v", app)
+	render.JSON(app)
 }
