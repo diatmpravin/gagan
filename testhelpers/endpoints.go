@@ -2,6 +2,7 @@ package testhelpers
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -15,6 +16,25 @@ var successMatcher = func(*http.Request) bool {
 type TestResponse struct {
 	Body   string
 	Status int
+}
+
+var RequestBodyMatcher = func(expectedBody string) RequestMatcher {
+	return func(request *http.Request) bool {
+		bodyBytes, err := ioutil.ReadAll(request.Body)
+
+		if err != nil {
+			fmt.Printf("Error reading request body: %s", err.Error())
+			return false
+		}
+
+		actualBody := string(bodyBytes)
+		bodyMatches := actualBody == expectedBody
+
+		if !bodyMatches {
+			fmt.Printf("Body did not match. Expected [%s], Actual [%s]", expectedBody, actualBody)
+		}
+		return bodyMatches
+	}
 }
 
 var CreateEndpoint = func(method string, path string, customMatcher RequestMatcher, response TestResponse) http.HandlerFunc {

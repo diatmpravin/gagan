@@ -18,6 +18,8 @@ type CloudControllerApplicationRepository struct {
 type ApplicationRepository interface {
 	FindApps(config *configuration.Configuration) (apps []models.Application, err error)
 	FindByName(config *configuration.Configuration, name string) (app models.Application, err error)
+	Stop(config *configuration.Configuration, app models.Application) (err error)
+	Start(config *configuration.Configuration, app models.Application) (err error)
 }
 
 func (repo CloudControllerApplicationRepository) FindApps(config *configuration.Configuration) (apps []models.Application, err error) {
@@ -71,6 +73,26 @@ func (repo CloudControllerApplicationRepository) FindByName(config *configuratio
 	return
 }
 
+func (repo CloudControllerApplicationRepository) Stop(config *configuration.Configuration, app models.Application) (err error) {
+	return changeApplicationState(config, app, "STOPPED")
+}
+
+func (repo CloudControllerApplicationRepository) Start(config *configuration.Configuration, app models.Application) (err error) {
+	return changeApplicationState(config, app, "STARTED")
+}
+
+func changeApplicationState(config *configuration.Configuration, app models.Application, state string) (err error) {
+	path := fmt.Sprintf("%s/v2/apps/%s", config.Target, app.Guid)
+	body := fmt.Sprintf(`{"console":true,"state":"%s"}`, state)
+	request, err := api.NewAuthorizedRequest("PUT", path, config.AccessToken, strings.NewReader(body))
+
+	if err != nil {
+		return
+	}
+
+	return api.PerformRequest(request)
+}
+
 // ListAllApps GET list of all apps
 func ListAllApps(w http.ResponseWriter, r *http.Request) {
 	render := &api.Render{r, w}
@@ -107,5 +129,67 @@ func GetAppSummary(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Detials of a app: %+v", app)
+	render.JSON(app)
+}
+
+// StopAnApp will stop an app
+func StopAnApp(w http.ResponseWriter, r *http.Request) {
+	render := &api.Render{r, w}
+
+	config := configuration.GetDefaultConfig()
+	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	appname := r.URL.Query().Get("appname")
+	repo := CloudControllerApplicationRepository{}
+
+	app, err := repo.FindByName(config, appname)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	err = repo.Stop(config, app)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	app, err = repo.FindByName(config, appname)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	log.Printf("App status: %+v", app)
+	render.JSON(app)
+}
+
+// StartingAnApp will stop an app
+func StartingAnApp(w http.ResponseWriter, r *http.Request) {
+	render := &api.Render{r, w}
+
+	config := configuration.GetDefaultConfig()
+	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	appname := r.URL.Query().Get("appname")
+	repo := CloudControllerApplicationRepository{}
+
+	app, err := repo.FindByName(config, appname)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	err = repo.Start(config, app)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	app, err = repo.FindByName(config, appname)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	log.Printf("App status: %+v", app)
 	render.JSON(app)
 }

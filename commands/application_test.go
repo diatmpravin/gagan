@@ -132,3 +132,67 @@ func TestFindByName(t *testing.T) {
 	app, err = repo.FindByName(config, "app that does not exist")
 	assert.Error(t, err)
 }
+
+var startApplicationEndpoint = testhelpers.CreateEndpoint(
+	"PUT",
+	"/v2/apps/my-cool-app-guid",
+	testhelpers.RequestBodyMatcher(`{"console":true,"state":"STARTED"}`),
+	testhelpers.TestResponse{Status: http.StatusCreated, Body: `
+{
+  "metadata": {
+    "guid": "my-cool-app-guid",
+  },
+  "entity": {
+    "name": "cli1",
+    "state": "STARTED"
+  }
+}`},
+)
+
+func TestStartApplication(t *testing.T) {
+	ts := httptest.NewTLSServer(http.HandlerFunc(startApplicationEndpoint))
+	defer ts.Close()
+
+	repo := CloudControllerApplicationRepository{}
+	config := &configuration.Configuration{
+		AccessToken: "BEARER my_access_token",
+		Target:      ts.URL,
+	}
+
+	app := models.Application{Name: "my-cool-app", Guid: "my-cool-app-guid"}
+
+	err := repo.Start(config, app)
+	assert.NoError(t, err)
+}
+
+var stopApplicationEndpoint = testhelpers.CreateEndpoint(
+	"PUT",
+	"/v2/apps/my-cool-app-guid",
+	testhelpers.RequestBodyMatcher(`{"console":true,"state":"STOPPED"}`),
+	testhelpers.TestResponse{Status: http.StatusCreated, Body: `
+{
+  "metadata": {
+    "guid": "my-cool-app-guid",
+  },
+  "entity": {
+    "name": "cli1",
+    "state": "STOPPED"
+  }
+}`},
+)
+
+func TestStopApplication(t *testing.T) {
+	ts := httptest.NewTLSServer(http.HandlerFunc(stopApplicationEndpoint))
+	defer ts.Close()
+
+	repo := CloudControllerApplicationRepository{}
+	config := &configuration.Configuration{
+		AccessToken: "BEARER my_access_token",
+		Target:      ts.URL,
+	}
+
+	app := models.Application{Name: "my-cool-app", Guid: "my-cool-app-guid"}
+
+	err := repo.Stop(config, app)
+	assert.NoError(t, err)
+}
