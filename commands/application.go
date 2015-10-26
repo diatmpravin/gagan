@@ -9,6 +9,7 @@ import (
 	"github.com/diatmpravin/gagan/models"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
@@ -21,6 +22,8 @@ type ApplicationRepository interface {
 	Stop(config *configuration.Configuration, app models.Application) (err error)
 	Start(config *configuration.Configuration, app models.Application) (err error)
 	Delete(config *configuration.Configuration, app models.Application) (err error)
+	Create(config *configuration.Configuration, newApp models.Application) (createdApp models.Application, err error)
+	Upload(config *configuration.Configuration, app models.Application) (err error)
 }
 
 func (repo CloudControllerApplicationRepository) FindApps(config *configuration.Configuration) (apps []models.Application, err error) {
@@ -93,6 +96,36 @@ func (repo CloudControllerApplicationRepository) Start(config *configuration.Con
 	return changeApplicationState(config, app, "STARTED")
 }
 
+func (repo CloudControllerApplicationRepository) Create(config *configuration.Configuration, newApp models.Application) (createdApp models.Application, err error) {
+	err = validateApplication(newApp)
+	if err != nil {
+		return
+	}
+
+	path := fmt.Sprintf("%s/v2/apps", config.Target)
+	data := fmt.Sprintf(
+		`{"space_guid":"%s","name":"%s","instances":1,"buildpack":null,"command":null,"memory":256,"stack_guid":null}`,
+		config.Space.Guid, newApp.Name,
+	)
+	request, err := api.NewAuthorizedRequest("POST", path, config.AccessToken, strings.NewReader(data))
+	if err != nil {
+		return
+	}
+
+	resource := new(Resource)
+	err = api.PerformRequestAndParseResponse(request, resource)
+
+	if err != nil {
+		return
+	}
+
+	createdApp.Guid = resource.Metadata.Guid
+	createdApp.Name = resource.Entity.Name
+
+	log.Printf("Created App Details: %+v", createdApp)
+	return
+}
+
 func changeApplicationState(config *configuration.Configuration, app models.Application, state string) (err error) {
 	path := fmt.Sprintf("%s/v2/apps/%s", config.Target, app.Guid)
 	body := fmt.Sprintf(`{"console":true,"state":"%s"}`, state)
@@ -103,6 +136,15 @@ func changeApplicationState(config *configuration.Configuration, app models.Appl
 	}
 
 	return api.PerformRequest(request)
+}
+
+func validateApplication(app models.Application) (err error) {
+	reg := regexp.MustCompile("^[0-9a-zA-Z\\-_]*$")
+	if !reg.MatchString(app.Name) {
+		err = errors.New("Application name is invalid. Name can only contain letters, numbers, underscores and hyphens.")
+	}
+
+	return
 }
 
 // ListAllApps GET list of all apps
@@ -232,4 +274,78 @@ func DeleteAPraticularApp(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("App status: %+v", res)
 	render.JSON(res)
+}
+
+// CreatingAnApp will create app
+func CreatingAnApp(w http.ResponseWriter, r *http.Request) {
+	render := &api.Render{r, w}
+
+	config := configuration.GetDefaultConfig()
+	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	appName := r.URL.Query().Get("appname")
+	repo := CloudControllerApplicationRepository{}
+
+	app, err := repo.FindByName(config, appName)
+
+	if err != nil {
+		app, err = createApp(config, appName)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// TODO, need to implement
+	// err = repo.Upload(config, app)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+
+	log.Printf("App details: %+v", app)
+	render.JSON(app)
+}
+
+func createApp(config *configuration.Configuration, appName string) (app models.Application, err error) {
+	newApp := models.Application{Name: appName}
+	repo := CloudControllerApplicationRepository{}
+
+	log.Printf("Creating %s...", appName)
+	app, err = repo.Create(config, newApp)
+	if err != nil {
+		err = errors.New("Error creating application.")
+		return
+	}
+
+	domainRepo := CloudControllerDomainRepository{}
+	domains, err := domainRepo.FindAll(config)
+
+	if err != nil {
+		err = errors.New("Error loading domains")
+		return
+	}
+
+	domain := domains[0]
+	newRoute := models.Route{Host: app.Name}
+
+	routeRepo := CloudControllerRouteRepository{}
+	log.Printf("Creating route %s.%s...", app.Name, domain.Name)
+	createdRoute, err := routeRepo.Create(config, newRoute, domain)
+	if err != nil {
+		err = errors.New("Error creating route")
+		return
+	}
+
+	log.Printf("Binding %s.%s to %s...", app.Name, domain.Name, app.Name)
+	err = routeRepo.Bind(config, createdRoute, app)
+	if err != nil {
+		err = errors.New("Error binding route")
+		return
+	}
+
+	return
 }
