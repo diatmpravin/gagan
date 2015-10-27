@@ -154,7 +154,7 @@ func (repo CloudControllerApplicationRepository) GetInstances(config *configurat
 		if err != nil {
 			continue
 		}
-		instances[index] = models.ApplicationInstance{State: strings.ToLower(v.State)}
+		instances[index] = models.ApplicationInstance{State: models.InstanceState(strings.ToLower(v.State))}
 	}
 	return
 }
