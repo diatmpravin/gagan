@@ -10,10 +10,17 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 type CloudControllerApplicationRepository struct {
+}
+
+type InstancesApiResponse map[string]InstanceApiResponse
+
+type InstanceApiResponse struct {
+	State string
 }
 
 type ApplicationRepository interface {
@@ -24,6 +31,7 @@ type ApplicationRepository interface {
 	Delete(config *configuration.Configuration, app models.Application) (err error)
 	Create(config *configuration.Configuration, newApp models.Application) (createdApp models.Application, err error)
 	Upload(config *configuration.Configuration, app models.Application) (err error)
+	GetInstances(config *configuration.Configuration, app models.Application) (instance models.ApplicationInstance, err error)
 }
 
 func (repo CloudControllerApplicationRepository) FindApps(config *configuration.Configuration) (apps []models.Application, err error) {
@@ -123,6 +131,31 @@ func (repo CloudControllerApplicationRepository) Create(config *configuration.Co
 	createdApp.Name = resource.Entity.Name
 
 	log.Printf("Created App Details: %+v", createdApp)
+	return
+}
+
+func (repo CloudControllerApplicationRepository) GetInstances(config *configuration.Configuration, app models.Application) (instances []models.ApplicationInstance, err error) {
+	path := fmt.Sprintf("%s/v2/apps/%s/instances", config.Target, app.Guid)
+	request, err := api.NewAuthorizedRequest("GET", path, config.AccessToken, nil)
+	if err != nil {
+		return
+	}
+
+	apiResponse := InstancesApiResponse{}
+
+	err = api.PerformRequestAndParseResponse(request, &apiResponse)
+	if err != nil {
+		return
+	}
+
+	instances = make([]models.ApplicationInstance, len(apiResponse), len(apiResponse))
+	for k, v := range apiResponse {
+		index, err := strconv.Atoi(k)
+		if err != nil {
+			continue
+		}
+		instances[index] = models.ApplicationInstance{State: strings.ToLower(v.State)}
+	}
 	return
 }
 
@@ -234,7 +267,6 @@ func StartingAnApp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	log.Printf("----------------> %+v", app.State)
 	if app.State == "started" {
 		http.Error(w, fmt.Sprintf("Application %s is already started.", appName), http.StatusBadRequest)
 	}
@@ -243,6 +275,12 @@ func StartingAnApp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+
+	instances, err := repo.GetInstances(config, app)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	log.Printf("App Instances: %+v", instances)
 
 	app, err = repo.FindByName(config, appName)
 	if err != nil {

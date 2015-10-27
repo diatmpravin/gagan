@@ -11,7 +11,8 @@ func TestPutUser(t *testing.T) {
 		Password: "cf@rest12",
 	}
 
-	config, err := PutUser(&u)
+	l := Login{}
+	config, err := l.PutUser(&u)
 	if err != nil {
 		t.Fatalf("Unexpect error on authenticating user: %v", err)
 	}
