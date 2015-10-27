@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+type Authenticator interface {
+	Authenticate(endpoint string, email string, password string) (response AuthenticationResponse, err error)
+}
+
 type AuthenticationResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`

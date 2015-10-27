@@ -9,6 +9,13 @@ import (
 	"net/http"
 )
 
+type Login struct {
+	config        *configuration.Configuration
+	orgRepo       OrganizationRepository
+	spaceRepo     SpaceRepository
+	authenticator api.Authenticator
+}
+
 type User struct {
 	Email    string `json:email`
 	Password string `json:password`
@@ -24,7 +31,7 @@ func (u *User) IsValid() error {
 }
 
 // PutPerson get user token from CC
-func PutUser(u *User) (config *configuration.Configuration, err error) {
+func (l Login) PutUser(u *User) (config *configuration.Configuration, err error) {
 	config = configuration.GetDefaultConfig()
 
 	response, err := api.Authenticate(config.AuthorizationEndpoint, u.Email, u.Password)
@@ -49,7 +56,8 @@ func SessionPostCase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	config, err := PutUser(&u)
+	l := Login{}
+	config, err := l.PutUser(&u)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
