@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"strings"
 )
 
 type errorResponse struct {
@@ -63,7 +64,7 @@ func PerformRequestAndParseResponse(request *http.Request, response interface{})
 func doRequest(request *http.Request) (response *http.Response, err error) {
 	client := newClient()
 
-	if os.Getenv("TRACE") != "" {
+	if traceEnabled() {
 		dumpedRequest, err := httputil.DumpRequest(request, true)
 		if err != nil {
 			fmt.Println("Error dumping request")
@@ -74,7 +75,7 @@ func doRequest(request *http.Request) (response *http.Response, err error) {
 
 	response, err = client.Do(request)
 
-	if os.Getenv("TRACE") != "" {
+	if traceEnabled() {
 		dumpedResponse, err := httputil.DumpResponse(response, true)
 		if err != nil {
 			fmt.Println("Error dumping response")
@@ -95,6 +96,11 @@ func doRequest(request *http.Request) (response *http.Response, err error) {
 	}
 
 	return
+}
+
+func traceEnabled() bool {
+	traceEnv := strings.ToLower(os.Getenv("CF_TRACE"))
+	return traceEnv == "true" || traceEnv == "yes"
 }
 
 func getErrorResponse(response *http.Response) (eR errorResponse) {
