@@ -175,9 +175,9 @@ func GetAppSummary(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	appname := r.URL.Query().Get("appname")
+	appName := r.URL.Query().Get("appname")
 	repo := CloudControllerApplicationRepository{}
-	app, err := repo.FindByName(config, appname)
+	app, err := repo.FindByName(config, appName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -195,10 +195,10 @@ func StopAnApp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	appname := r.URL.Query().Get("appname")
+	appName := r.URL.Query().Get("appname")
 	repo := CloudControllerApplicationRepository{}
 
-	app, err := repo.FindByName(config, appname)
+	app, err := repo.FindByName(config, appName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -208,7 +208,7 @@ func StopAnApp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	app, err = repo.FindByName(config, appname)
+	app, err = repo.FindByName(config, appName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -226,12 +226,17 @@ func StartingAnApp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	appname := r.URL.Query().Get("appname")
+	appName := r.URL.Query().Get("appname")
 	repo := CloudControllerApplicationRepository{}
 
-	app, err := repo.FindByName(config, appname)
+	app, err := repo.FindByName(config, appName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	log.Printf("----------------> %+v", app.State)
+	if app.State == "started" {
+		http.Error(w, fmt.Sprintf("Application %s is already started.", appName), http.StatusBadRequest)
 	}
 
 	err = repo.Start(config, app)
@@ -239,7 +244,7 @@ func StartingAnApp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	app, err = repo.FindByName(config, appname)
+	app, err = repo.FindByName(config, appName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -257,10 +262,10 @@ func DeleteAPraticularApp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	appname := r.URL.Query().Get("appname")
+	appName := r.URL.Query().Get("appname")
 	repo := CloudControllerApplicationRepository{}
 
-	app, err := repo.FindByName(config, appname)
+	app, err := repo.FindByName(config, appName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -270,7 +275,7 @@ func DeleteAPraticularApp(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	res := map[string]string{"appname": appname, "message": "App deleted successfully"}
+	res := map[string]string{"appname": appName, "message": "App deleted successfully"}
 
 	log.Printf("App status: %+v", res)
 	render.JSON(res)
