@@ -1,8 +1,7 @@
-package commands
+package api
 
 import (
 	"fmt"
-	"github.com/diatmpravin/gagan/api"
 	"github.com/diatmpravin/gagan/configuration"
 	"github.com/diatmpravin/gagan/models"
 	"log"
@@ -17,13 +16,13 @@ type CloudControllerDomainRepository struct {
 
 func (repo CloudControllerDomainRepository) FindAll(config *configuration.Configuration) (domains []models.Domain, err error) {
 	path := fmt.Sprintf("%s/v2/spaces/%s/domains", config.Target, config.Space.Guid)
-	request, err := api.NewAuthorizedRequest("GET", path, config.AccessToken, nil)
+	request, err := NewAuthorizedRequest("GET", path, config.AccessToken, nil)
 	if err != nil {
 		return
 	}
 
-	response := new(api.ApiResponse)
-	err = api.PerformRequestAndParseResponse(request, response)
+	response := new(ApiResponse)
+	err = PerformRequestAndParseResponse(request, response)
 	if err != nil {
 		return
 	}

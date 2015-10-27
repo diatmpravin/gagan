@@ -1,8 +1,7 @@
-package commands
+package api
 
 import (
 	"fmt"
-	"github.com/diatmpravin/gagan/api"
 	"github.com/diatmpravin/gagan/configuration"
 	"github.com/diatmpravin/gagan/models"
 	"log"
@@ -23,13 +22,13 @@ func (repo CloudControllerRouteRepository) Create(config *configuration.Configur
 		`{"host":"%s","domain_guid":"%s","space_guid":"%s"}`,
 		newRoute.Host, domain.Guid, config.Space.Guid,
 	)
-	request, err := api.NewAuthorizedRequest("POST", path, config.AccessToken, strings.NewReader(data))
+	request, err := NewAuthorizedRequest("POST", path, config.AccessToken, strings.NewReader(data))
 	if err != nil {
 		return
 	}
 
-	resource := new(api.Resource)
-	err = api.PerformRequestAndParseResponse(request, resource)
+	resource := new(Resource)
+	err = PerformRequestAndParseResponse(request, resource)
 	if err != nil {
 		return
 	}
@@ -43,12 +42,12 @@ func (repo CloudControllerRouteRepository) Create(config *configuration.Configur
 
 func (repo CloudControllerRouteRepository) Bind(config *configuration.Configuration, route models.Route, app models.Application) (err error) {
 	path := fmt.Sprintf("%s/v2/apps/%s/routes/%s", config.Target, app.Guid, route.Guid)
-	request, err := api.NewAuthorizedRequest("PUT", path, config.AccessToken, nil)
+	request, err := NewAuthorizedRequest("PUT", path, config.AccessToken, nil)
 	if err != nil {
 		return
 	}
 
-	err = api.PerformRequest(request)
+	err = PerformRequest(request)
 
 	log.Printf("App Route after Bind: %+v", app)
 	return

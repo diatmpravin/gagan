@@ -1,4 +1,4 @@
-package commands
+package api
 
 import (
 	"github.com/diatmpravin/gagan/configuration"

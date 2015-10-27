@@ -11,8 +11,8 @@ import (
 
 type Login struct {
 	config        *configuration.Configuration
-	orgRepo       OrganizationRepository
-	spaceRepo     SpaceRepository
+	orgRepo       api.OrganizationRepository
+	spaceRepo     api.SpaceRepository
 	authenticator api.Authenticator
 }
 

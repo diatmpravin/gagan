@@ -1,8 +1,7 @@
-package commands
+package api
 
 import (
 	"encoding/json"
-	"github.com/diatmpravin/gagan/api"
 	"github.com/diatmpravin/gagan/configuration"
 	"github.com/diatmpravin/gagan/models"
 	"log"
@@ -19,13 +18,13 @@ type CloudControllerOrganizationRepository struct {
 func (repo CloudControllerOrganizationRepository) FindOrganizations(config *configuration.Configuration) (orgs []models.Organization, err error) {
 	path := config.Target + "/v2/organizations"
 
-	request, err := api.NewAuthorizedRequest("GET", path, config.AccessToken, nil)
+	request, err := NewAuthorizedRequest("GET", path, config.AccessToken, nil)
 	if err != nil {
 		return
 	}
-	response := new(api.ApiResponse)
+	response := new(ApiResponse)
 
-	err = api.PerformRequestAndParseResponse(request, response)
+	err = PerformRequestAndParseResponse(request, response)
 	if err != nil {
 		return
 	}
@@ -39,7 +38,7 @@ func (repo CloudControllerOrganizationRepository) FindOrganizations(config *conf
 
 // ListAllOrganizations GET list of all organizations
 func ListAllOrganizations(w http.ResponseWriter, r *http.Request) {
-	render := &api.Render{r, w}
+	render := &Render{r, w}
 
 	config := configuration.GetDefaultConfig()
 	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {

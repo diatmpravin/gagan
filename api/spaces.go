@@ -1,9 +1,8 @@
-package commands
+package api
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/diatmpravin/gagan/api"
 	"github.com/diatmpravin/gagan/configuration"
 	"github.com/diatmpravin/gagan/models"
 	"log"
@@ -19,14 +18,14 @@ type CloudControllerSpaceRepository struct {
 
 func (repo CloudControllerSpaceRepository) FindAllSpaces(config *configuration.Configuration) (spaces []models.Space, err error) {
 	path := fmt.Sprintf("%s/v2/organizations/%s/spaces", config.Target, config.Organization.Guid)
-	request, err := api.NewAuthorizedRequest("GET", path, config.AccessToken, nil)
+	request, err := NewAuthorizedRequest("GET", path, config.AccessToken, nil)
 	if err != nil {
 		return
 	}
 
-	response := new(api.ApiResponse)
+	response := new(ApiResponse)
 
-	err = api.PerformRequestAndParseResponse(request, response)
+	err = PerformRequestAndParseResponse(request, response)
 
 	if err != nil {
 		return
@@ -41,7 +40,7 @@ func (repo CloudControllerSpaceRepository) FindAllSpaces(config *configuration.C
 
 // ListAllSpaces Get list of all spaces
 func ListAllSpaces(w http.ResponseWriter, r *http.Request) {
-	render := &api.Render{r, w}
+	render := &Render{r, w}
 
 	config := configuration.GetDefaultConfig()
 	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {

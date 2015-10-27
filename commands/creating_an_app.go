@@ -55,7 +55,7 @@ func createApp(config *configuration.Configuration, appName string) (app models.
 		return
 	}
 
-	domainRepo := CloudControllerDomainRepository{}
+	domainRepo := api.CloudControllerDomainRepository{}
 	domains, err := domainRepo.FindAll(config)
 
 	if err != nil {
@@ -66,7 +66,7 @@ func createApp(config *configuration.Configuration, appName string) (app models.
 	domain := domains[0]
 	newRoute := models.Route{Host: app.Name}
 
-	routeRepo := CloudControllerRouteRepository{}
+	routeRepo := api.CloudControllerRouteRepository{}
 	log.Printf("Creating route %s.%s...", app.Name, domain.Name)
 	createdRoute, err := routeRepo.Create(config, newRoute, domain)
 	if err != nil {
