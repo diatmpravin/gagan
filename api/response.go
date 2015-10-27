@@ -1,4 +1,4 @@
-package commands
+package api
 
 type Metadata struct {
 	Guid string
