@@ -22,7 +22,7 @@ func (repo CloudControllerDomainRepository) FindAll(config *configuration.Config
 	}
 
 	response := new(ApiResponse)
-	err = PerformRequestAndParseResponse(request, response)
+	_, err = PerformRequestAndParseResponse(request, response)
 	if err != nil {
 		return
 	}

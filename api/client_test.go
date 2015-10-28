@@ -33,7 +33,7 @@ func TestPerformRequestOutputsErrorFromServer(t *testing.T) {
 	request, err := NewAuthorizedRequest("GET", ts.URL, "TOKEN", nil)
 	assert.NoError(t, err)
 
-	err = PerformRequest(request)
+	_, err = PerformRequest(request)
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "The host is taken: test1")

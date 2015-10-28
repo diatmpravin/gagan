@@ -24,7 +24,7 @@ func (repo CloudControllerServiceRepository) GetServiceOfferings(config *configu
 
 	response := new(ServiceOfferingsApiResponse)
 
-	err = PerformRequestAndParseResponse(request, response)
+	_, err = PerformRequestAndParseResponse(request, response)
 
 	if err != nil {
 		return
@@ -53,6 +53,6 @@ func (repo CloudControllerServiceRepository) CreateServiceInstance(config *confi
 		return
 	}
 
-	err = PerformRequest(request)
+	_, err = PerformRequest(request)
 	return
 }

@@ -32,7 +32,7 @@ func Authenticate(endpoint string, email string, password string) (response Auth
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	request.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte("cf:")))
 
-	err = PerformRequestAndParseResponse(request, &response)
+	_, err = PerformRequestAndParseResponse(request, &response)
 
 	return
 }

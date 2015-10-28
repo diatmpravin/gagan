@@ -36,13 +36,13 @@ func NewAuthorizedRequest(method, path, accessToken string, body io.Reader) (req
 	return
 }
 
-func PerformRequest(request *http.Request) (err error) {
-	_, err = doRequest(request)
+func PerformRequest(request *http.Request) (errorCode int, err error) {
+	_, errorCode, err = doRequest(request)
 	return
 }
 
-func PerformRequestAndParseResponse(request *http.Request, response interface{}) (err error) {
-	rawResponse, err := doRequest(request)
+func PerformRequestAndParseResponse(request *http.Request, response interface{}) (errorCode int, err error) {
+	rawResponse, errorCode, err := doRequest(request)
 	if err != nil {
 		return
 	}
@@ -61,7 +61,7 @@ func PerformRequestAndParseResponse(request *http.Request, response interface{})
 	return
 }
 
-func doRequest(request *http.Request) (response *http.Response, err error) {
+func doRequest(request *http.Request) (response *http.Response, errorCode int, err error) {
 	client := newClient()
 
 	if traceEnabled() {

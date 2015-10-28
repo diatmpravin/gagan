@@ -28,7 +28,7 @@ func (repo CloudControllerRouteRepository) Create(config *configuration.Configur
 	}
 
 	resource := new(Resource)
-	err = PerformRequestAndParseResponse(request, resource)
+	_, err = PerformRequestAndParseResponse(request, resource)
 	if err != nil {
 		return
 	}
@@ -47,7 +47,7 @@ func (repo CloudControllerRouteRepository) Bind(config *configuration.Configurat
 		return
 	}
 
-	err = PerformRequest(request)
+	_, err = PerformRequest(request)
 
 	log.Printf("App Route after Bind: %+v", app)
 	return

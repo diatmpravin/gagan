@@ -39,7 +39,7 @@ func (repo CloudControllerApplicationRepository) FindApps(config *configuration.
 	}
 
 	response := new(ApplicationsApiResponse)
-	err = PerformRequestAndParseResponse(request, response)
+	_, err = PerformRequestAndParseResponse(request, response)
 	if err != nil {
 		return
 	}
@@ -89,7 +89,7 @@ func (repo CloudControllerApplicationRepository) Delete(config *configuration.Co
 		return
 	}
 
-	err = PerformRequest(request)
+	_, err = PerformRequest(request)
 	return
 }
 
@@ -118,7 +118,7 @@ func (repo CloudControllerApplicationRepository) Create(config *configuration.Co
 	}
 
 	resource := new(Resource)
-	err = PerformRequestAndParseResponse(request, resource)
+	_, err = PerformRequestAndParseResponse(request, resource)
 
 	if err != nil {
 		return
@@ -140,7 +140,7 @@ func (repo CloudControllerApplicationRepository) GetInstances(config *configurat
 
 	apiResponse := InstancesApiResponse{}
 
-	err = PerformRequestAndParseResponse(request, &apiResponse)
+	_, err = PerformRequestAndParseResponse(request, &apiResponse)
 	if err != nil {
 		return
 	}
@@ -165,7 +165,8 @@ func changeApplicationState(config *configuration.Configuration, app models.Appl
 		return
 	}
 
-	return PerformRequest(request)
+	_, err = PerformRequest(request)
+	return
 }
 
 func validateApplication(app models.Application) (err error) {
