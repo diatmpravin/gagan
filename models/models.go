@@ -54,6 +54,13 @@ type ServicePlan struct {
 }
 
 type ServiceInstance struct {
-	Name string
-	Guid string
+	Name            string
+	Guid            string
+	ServiceBindings []ServiceBinding
+}
+
+type ServiceBinding struct {
+	Url     string
+	Guid    string
+	AppGuid string
 }
