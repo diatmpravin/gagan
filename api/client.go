@@ -91,6 +91,7 @@ func doRequest(request *http.Request) (response *http.Response, errorCode int, e
 
 	if response.StatusCode > 299 {
 		errorResponse := getErrorResponse(response)
+		errorCode = errorResponse.Code
 		message := fmt.Sprintf("Server error, status code: %d, error code: %d, message: %s", response.StatusCode, errorResponse.Code, errorResponse.Description)
 		err = errors.New(message)
 	}
