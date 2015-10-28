@@ -32,6 +32,7 @@ type ApplicationRepository interface {
 }
 
 func (repo CloudControllerApplicationRepository) FindApps(config *configuration.Configuration) (apps []models.Application, err error) {
+
 	path := fmt.Sprintf("%s/v2/spaces/%s/apps?inline-relations-depth=2", config.Target, config.Space.Guid)
 	request, err := NewAuthorizedRequest("GET", path, config.AccessToken, nil)
 	if err != nil {
@@ -66,19 +67,50 @@ func (repo CloudControllerApplicationRepository) FindApps(config *configuration.
 }
 
 func (repo CloudControllerApplicationRepository) FindByName(config *configuration.Configuration, name string) (app models.Application, err error) {
-	apps, err := repo.FindApps(config)
+	path := fmt.Sprintf("%s/v2/spaces/%s/apps?q=name%s&inline-relations-depth=1", config.Target, config.Space.Guid, "%3A"+name)
+	request, err := NewAuthorizedRequest("GET", path, config.AccessToken, nil)
 	if err != nil {
 		return
 	}
 
-	lowerName := strings.ToLower(name)
-	for _, a := range apps {
-		if strings.ToLower(a.Name) == lowerName {
-			return a, nil
-		}
+	findResponse := new(ApplicationsApiResponse)
+	_, err = PerformRequestAndParseResponse(request, findResponse)
+	if err != nil {
+		return
 	}
 
-	err = errors.New("Application not found")
+	if len(findResponse.Resources) == 0 {
+		err = errors.New(fmt.Sprintf("Application %s not found", name))
+		return
+	}
+
+	res := findResponse.Resources[0]
+	path = fmt.Sprintf("%s/v2/apps/%s/summary", config.Target, res.Metadata.Guid)
+	request, err = NewAuthorizedRequest("GET", path, config.AccessToken, nil)
+	if err != nil {
+		return
+	}
+
+	summaryResponse := new(ApplicationSummary)
+	_, err = PerformRequestAndParseResponse(request, summaryResponse)
+	if err != nil {
+		return
+	}
+
+	urls := []string{}
+	for _, route := range summaryResponse.Routes {
+		url := fmt.Sprintf("%s.%s", route.Host, route.Domain.Name)
+		urls = append(urls, url)
+	}
+
+	app = models.Application{
+		Name:      summaryResponse.Name,
+		Guid:      summaryResponse.Guid,
+		Instances: summaryResponse.Instances,
+		Memory:    summaryResponse.Memory,
+		Urls:      urls,
+	}
+
 	return
 }
 

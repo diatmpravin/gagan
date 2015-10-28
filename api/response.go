@@ -63,3 +63,25 @@ type ServicePlanResource struct {
 	Metadata Metadata
 	Entity   Entity
 }
+
+type ApplicationSummary struct {
+	Guid             string
+	Name             string
+	Routes           []RouteSummary
+	RunningInstances int `json:"running_instances"`
+	Memory           int
+	Instances        int
+	Urls             []string
+	State            string
+}
+
+type RouteSummary struct {
+	Guid   string
+	Host   string
+	Domain DomainSummary
+}
+
+type DomainSummary struct {
+	Guid string
+	Name string
+}

@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -110,8 +111,86 @@ func TestApplicationsFindAll(t *testing.T) {
 	assert.Equal(t, app.Guid, "app2-guid")
 }
 
+var singleAppResponse = testhelpers.TestResponse{Status: http.StatusOK, Body: `
+{
+  "resources": [
+    {
+      "metadata": {
+        "guid": "app1-guid"
+      },
+      "entity": {
+        "name": "App1",
+        "memory": 256,
+        "instances": 1,
+        "state": "STOPPED",
+        "routes": [
+      	  {
+      	    "metadata": {
+      	      "guid": "app1-route-guid"
+      	    },
+      	    "entity": {
+      	      "host": "app1",
+      	      "domain": {
+      	      	"metadata": {
+      	      	  "guid": "domain1-guid"
+      	      	},
+      	      	"entity": {
+      	      	  "name": "cfapps.io"
+      	      	}
+      	      }
+      	    }
+      	  }
+        ]
+      }
+    }
+  ]
+}`}
+
+var findAppEndpoint = testhelpers.CreateEndpoint(
+	"GET",
+	"/v2/spaces/my-space-guid/apps?q=name%3AApp1&inline-relations-depth=1",
+	nil,
+	singleAppResponse,
+)
+
+var appSummaryResponse = testhelpers.TestResponse{Status: http.StatusOK, Body: `
+{
+  "guid": "app1-guid",
+  "name": "App1",
+  "routes": [
+    {
+      "guid": "route-1-guid",
+      "host": "app1",
+      "domain": {
+        "guid": "domain-1-guid",
+        "name": "cfapps.io"
+      }
+    }
+  ],
+  "running_instances": 1,
+  "memory": 128,
+  "instances": 1
+}`}
+
+var appSummaryEndpoint = testhelpers.CreateEndpoint(
+	"GET",
+	"/v2/apps/app1-guid/summary",
+	nil,
+	appSummaryResponse,
+)
+
+var singleAppEndpoint = func(writer http.ResponseWriter, request *http.Request) {
+	if strings.Contains(request.URL.Path, "summary") {
+		appSummaryEndpoint(writer, request)
+		return
+	}
+
+	findAppEndpoint(writer, request)
+	return
+}
+
 func TestFindByName(t *testing.T) {
-	ts := httptest.NewTLSServer(http.HandlerFunc(multipleAppsEndpoint))
+	ts := httptest.NewTLSServer(http.HandlerFunc(singleAppEndpoint))
 	defer ts.Close()
 
 	repo := CloudControllerApplicationRepository{}
@@ -125,10 +204,11 @@ func TestFindByName(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, app.Name, "App1")
 	assert.Equal(t, app.Guid, "app1-guid")
+	assert.Equal(t, app.Memory, 128)
+	assert.Equal(t, app.Instances, 1)
 
-	app, err = repo.FindByName(config, "app1")
-	assert.NoError(t, err)
-	assert.Equal(t, app.Guid, "app1-guid")
+	assert.Equal(t, len(app.Urls), 1)
+	assert.Equal(t, app.Urls[0], "app1.cfapps.io")
 
 	app, err = repo.FindByName(config, "app that does not exist")
 	assert.Error(t, err)

@@ -52,3 +52,8 @@ type ServicePlan struct {
 	Name string
 	Guid string
 }
+
+type ServiceInstance struct {
+	Name string
+	Guid string
+}
