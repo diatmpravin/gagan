@@ -41,3 +41,14 @@ const (
 type ApplicationInstance struct {
 	State InstanceState
 }
+
+type ServiceOffering struct {
+	Label string
+	Guid  string
+	Plans []ServicePlan
+}
+
+type ServicePlan struct {
+	Name string
+	Guid string
+}

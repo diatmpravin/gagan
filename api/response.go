@@ -44,3 +44,22 @@ type RouteEntity struct {
 	Host   string
 	Domain Resource
 }
+
+type ServiceOfferingsApiResponse struct {
+	Resources []ServiceOfferingResource
+}
+
+type ServiceOfferingResource struct {
+	Metadata Metadata
+	Entity   ServiceOfferingEntity
+}
+
+type ServiceOfferingEntity struct {
+	Label        string
+	ServicePlans []ServicePlanResource `json:"service_plans"`
+}
+
+type ServicePlanResource struct {
+	Metadata Metadata
+	Entity   Entity
+}
