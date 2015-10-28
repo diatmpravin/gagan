@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -164,4 +165,75 @@ func TestBindService(t *testing.T) {
 	app := models.Application{Guid: "my-app-guid"}
 	err := repo.BindService(config, serviceInstance, app)
 	assert.NoError(t, err)
+}
+
+var getServiceInstanceEndpoint = testhelpers.CreateEndpoint(
+	"GET",
+	"/v2/service_instances/my-service-instance-guid?inline-relations-depth=1",
+	nil,
+	testhelpers.TestResponse{Status: http.StatusOK, Body: `{
+  "metadata": {
+    "guid": "my-service-instance-guid"
+  },
+  "entity": {
+    "name": "foo-clear-db",
+    "service_bindings": [
+      {
+        "metadata": {
+          "guid": "service-binding-1-guid",
+          "url": "/v2/service_bindings/service-binding-1-guid"
+        },
+        "entity": {
+          "app_guid": "app-1-guid"
+        }
+      },
+      {
+        "metadata": {
+          "guid": "service-binding-2-guid",
+          "url": "/v2/service_bindings/service-binding-2-guid"
+        },
+        "entity": {
+          "app_guid": "app-2-guid"
+        }
+      }
+    ]
+  }
+}`},
+)
+
+var deleteBindingEndPointWasCalled bool = false
+
+var deleteBindingEndpoint = testhelpers.CreateEndpoint(
+	"DELETE",
+	"/v2/service_bindings/service-binding-2-guid",
+	nil,
+	testhelpers.TestResponse{Status: http.StatusOK},
+)
+
+var unbindServiceEndpoint = func(writer http.ResponseWriter, request *http.Request) {
+	if strings.Contains(request.URL.Path, "service_bindings") {
+		deleteBindingEndpoint(writer, request)
+		deleteBindingEndPointWasCalled = true
+		return
+	}
+
+	getServiceInstanceEndpoint(writer, request)
+	return
+}
+
+func TestUnbindService(t *testing.T) {
+	ts := httptest.NewTLSServer(http.HandlerFunc(unbindServiceEndpoint))
+	defer ts.Close()
+
+	repo := CloudControllerServiceRepository{}
+	config := &configuration.Configuration{
+		AccessToken: "BEARER my_access_token",
+		Target:      ts.URL,
+	}
+
+	serviceInstance := models.ServiceInstance{Guid: "my-service-instance-guid"}
+	app := models.Application{Guid: "app-2-guid"}
+	err := repo.UnbindService(config, serviceInstance, app)
+	assert.NoError(t, err)
+	assert.True(t, deleteBindingEndPointWasCalled)
 }
