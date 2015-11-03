@@ -27,8 +27,7 @@ type ApplicationRepository interface {
 	Start(config *configuration.Configuration, app models.Application) (err error)
 	Delete(config *configuration.Configuration, app models.Application) (err error)
 	Create(config *configuration.Configuration, newApp models.Application) (createdApp models.Application, err error)
-	Upload(config *configuration.Configuration, app models.Application) (err error)
-	GetInstances(config *configuration.Configuration, app models.Application) (instance models.ApplicationInstance, err error)
+	GetInstances(config *configuration.Configuration, app models.Application) (instance []models.ApplicationInstance, err error)
 }
 
 func (repo CloudControllerApplicationRepository) FindApps(config *configuration.Configuration) (apps []models.Application, err error) {
