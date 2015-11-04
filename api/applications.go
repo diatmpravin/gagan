@@ -106,6 +106,7 @@ func (repo CloudControllerApplicationRepository) FindByName(config *configuratio
 		Name:      summaryResponse.Name,
 		Guid:      summaryResponse.Guid,
 		Instances: summaryResponse.Instances,
+		State:     summaryResponse.State,
 		Memory:    summaryResponse.Memory,
 		Urls:      urls,
 	}
