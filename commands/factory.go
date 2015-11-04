@@ -32,3 +32,10 @@ func (f Factory) NewAllApps() Apps {
 		f.repoLocator.GetSpaceRepository(),
 	)
 }
+
+func (f Factory) NewAppSummary() *App {
+	return NewAppSummary(
+		f.repoLocator.GetConfig(),
+		f.repoLocator.GetApplicationRepository(),
+	)
+}
