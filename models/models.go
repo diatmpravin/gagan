@@ -5,20 +5,6 @@ type Organization struct {
 	Guid string
 }
 
-type Space struct {
-	Name string
-	Guid string
-}
-
-type Application struct {
-	Name      string
-	Guid      string
-	State     string
-	Instances int
-	Memory    int
-	Urls      []string
-}
-
 type Domain struct {
 	Name string
 	Guid string
@@ -43,24 +29,53 @@ type ApplicationInstance struct {
 }
 
 type ServiceOffering struct {
-	Label string
-	Guid  string
-	Plans []ServicePlan
+	Guid     string
+	Label    string
+	Provider string
+	Version  string
+	Plans    []ServicePlan
 }
 
 type ServicePlan struct {
-	Name string
-	Guid string
-}
-
-type ServiceInstance struct {
 	Name            string
 	Guid            string
-	ServiceBindings []ServiceBinding
+	ServiceOffering ServiceOffering
 }
 
 type ServiceBinding struct {
 	Url     string
 	Guid    string
 	AppGuid string
+}
+
+type Space struct {
+	Name             string
+	Guid             string
+	Applications     []Application
+	ServiceInstances []ServiceInstance
+}
+
+type Application struct {
+	Name             string
+	Guid             string
+	State            string
+	Instances        int
+	RunningInstances int
+	Memory           int
+	Urls             []string
+	BuildpackUrl     string
+	Stack            Stack
+}
+
+type ServiceInstance struct {
+	Name             string
+	Guid             string
+	ServiceBindings  []ServiceBinding
+	ServicePlan      ServicePlan
+	ApplicationNames []string
+}
+
+type Stack struct {
+	Name string
+	Guid string
 }

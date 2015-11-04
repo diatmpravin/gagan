@@ -25,3 +25,10 @@ func (f Factory) NewStop() *Stop {
 		f.repoLocator.GetApplicationRepository(),
 	)
 }
+
+func (f Factory) NewAllApps() Apps {
+	return NewAllApps(
+		f.repoLocator.GetConfig(),
+		f.repoLocator.GetSpaceRepository(),
+	)
+}
