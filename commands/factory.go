@@ -39,3 +39,10 @@ func (f Factory) NewAppSummary() *App {
 		f.repoLocator.GetApplicationRepository(),
 	)
 }
+
+func (f Factory) NewDelete() *Delete {
+	return NewDelete(
+		f.repoLocator.GetConfig(),
+		f.repoLocator.GetApplicationRepository(),
+	)
+}
