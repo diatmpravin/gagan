@@ -1,5 +1,9 @@
 package models
 
+import (
+	"time"
+)
+
 type Organization struct {
 	Name string
 	Guid string
@@ -78,4 +82,12 @@ type ServiceInstance struct {
 type Stack struct {
 	Name string
 	Guid string
+}
+
+type EventFields struct {
+	Guid        string
+	Name        string
+	Timestamp   time.Time
+	Description string
+	ActorName   string
 }

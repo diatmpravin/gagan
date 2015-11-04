@@ -53,3 +53,10 @@ func (f Factory) NewInstanceInformation() *InstanceInformation {
 		f.repoLocator.GetApplicationRepository(),
 	)
 }
+
+func (f Factory) NewAppEvents() *AppEvents {
+	return NewAppEvents(
+		f.repoLocator.GetConfig(),
+		f.repoLocator.GetApplicationEventRepository(),
+	)
+}
