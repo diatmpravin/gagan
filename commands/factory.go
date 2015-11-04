@@ -46,3 +46,10 @@ func (f Factory) NewDelete() *Delete {
 		f.repoLocator.GetApplicationRepository(),
 	)
 }
+
+func (f Factory) NewInstanceInformation() *InstanceInformation {
+	return NewInstanceInformation(
+		f.repoLocator.GetConfig(),
+		f.repoLocator.GetApplicationRepository(),
+	)
+}
