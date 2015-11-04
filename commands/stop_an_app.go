@@ -2,35 +2,59 @@ package commands
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/diatmpravin/gagan/api"
 	"github.com/diatmpravin/gagan/configuration"
+	"github.com/diatmpravin/gagan/requirements"
 	"log"
 	"net/http"
 )
 
-// StopAnApp will stop an app
-func StopAnApp(w http.ResponseWriter, r *http.Request) {
-	render := &api.Render{r, w}
+type Stop struct {
+	config  *configuration.Configuration
+	appRepo api.ApplicationRepository
+	appReq  requirements.ApplicationRequirement
+}
 
-	config := configuration.GetDefaultConfig()
+func NewStop(config *configuration.Configuration, appRepo api.ApplicationRepository) (s *Stop) {
+	s = new(Stop)
+	s.config = config
+	s.appRepo = appRepo
+
+	return
+}
+
+func (s *Stop) GetRequirements(reqFactory requirements.Factory, w http.ResponseWriter, r *http.Request) (reqs []Requirement, config *configuration.Configuration, err error) {
+	config = configuration.GetDefaultConfig()
 	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
+	s.config = config
+
 	appName := r.URL.Query().Get("appname")
-	repo := api.CloudControllerApplicationRepository{}
+	s.appReq = reqFactory.NewApplicationRequirement(appName)
 
-	app, err := repo.FindByName(config, appName)
+	reqs = []Requirement{&s.appReq}
+	return
+}
+
+func (s *Stop) Run(w http.ResponseWriter, r *http.Request) {
+	render := &api.Render{r, w}
+
+	app := s.appReq.Application
+
+	if app.State == "stopped" {
+		http.Error(w, fmt.Sprintf("Application %s is already stopped.", app.Name), http.StatusBadRequest)
+		return
+	}
+
+	err := s.appRepo.Stop(s.config, app)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	err = repo.Stop(config, app)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	app, err = repo.FindByName(config, appName)
+	app, err = s.appRepo.FindByName(s.config, app.Name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

@@ -18,3 +18,10 @@ func (f Factory) NewStart() *Start {
 		f.repoLocator.GetApplicationRepository(),
 	)
 }
+
+func (f Factory) NewStop() *Stop {
+	return NewStop(
+		f.repoLocator.GetConfig(),
+		f.repoLocator.GetApplicationRepository(),
+	)
+}
