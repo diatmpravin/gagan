@@ -60,3 +60,10 @@ func (f Factory) NewAppEvents() *AppEvents {
 		f.repoLocator.GetApplicationEventRepository(),
 	)
 }
+
+func (f Factory) NewSpaceList() SpaceList {
+	return NewSpaceList(
+		f.repoLocator.GetConfig(),
+		f.repoLocator.GetSpaceRepository(),
+	)
+}
