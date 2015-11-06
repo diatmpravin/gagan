@@ -67,3 +67,10 @@ func (f Factory) NewSpaceList() SpaceList {
 		f.repoLocator.GetSpaceRepository(),
 	)
 }
+
+func (f Factory) NewOrganizationList() OrganizationList {
+	return NewOrganizationList(
+		f.repoLocator.GetConfig(),
+		f.repoLocator.GetOrganizationRepository(),
+	)
+}

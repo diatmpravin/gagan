@@ -7,14 +7,17 @@ import (
 type RepositoryLocator struct {
 	config *configuration.Configuration
 
-	appRepo      CloudControllerApplicationRepository
-	spaceRepo    CloudControllerSpaceRepository
-	appEventRepo CloudControllerAppEventsRepository
+	appRepo          CloudControllerApplicationRepository
+	organizationRepo CloudControllerOrganizationRepository
+	spaceRepo        CloudControllerSpaceRepository
+	appEventRepo     CloudControllerAppEventsRepository
 }
 
 func NewRepositoryLocator(config *configuration.Configuration) (locator RepositoryLocator) {
 	locator.config = config
+
 	locator.appRepo = CloudControllerApplicationRepository{}
+	locator.organizationRepo = CloudControllerOrganizationRepository{}
 	locator.spaceRepo = CloudControllerSpaceRepository{}
 	locator.appEventRepo = CloudControllerAppEventsRepository{}
 
@@ -27,6 +30,10 @@ func (locator RepositoryLocator) GetConfig() *configuration.Configuration {
 
 func (locator RepositoryLocator) GetApplicationRepository() ApplicationRepository {
 	return locator.appRepo
+}
+
+func (locator RepositoryLocator) GetOrganizationRepository() OrganizationRepository {
+	return locator.organizationRepo
 }
 
 func (locator RepositoryLocator) GetSpaceRepository() SpaceRepository {

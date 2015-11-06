@@ -4,12 +4,28 @@ import (
 	"encoding/json"
 	"github.com/diatmpravin/gagan/api"
 	"github.com/diatmpravin/gagan/configuration"
+	"github.com/diatmpravin/gagan/requirements"
 	"log"
 	"net/http"
 )
 
-// ListAllOrganizations GET list of all organizations
-func ListAllOrganizations(w http.ResponseWriter, r *http.Request) {
+type OrganizationList struct {
+	config           *configuration.Configuration
+	organizationRepo api.OrganizationRepository
+}
+
+func NewOrganizationList(config *configuration.Configuration, organizationRepo api.OrganizationRepository) (o OrganizationList) {
+	o.config = config
+	o.organizationRepo = organizationRepo
+
+	return
+}
+
+func (o OrganizationList) GetRequirements(reqFactory requirements.Factory, w http.ResponseWriter, r *http.Request) (reqs []Requirement, config *configuration.Configuration, err error) {
+	return
+}
+
+func (o OrganizationList) Run(w http.ResponseWriter, r *http.Request) {
 	render := &api.Render{r, w}
 
 	config := configuration.GetDefaultConfig()
@@ -17,9 +33,7 @@ func ListAllOrganizations(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	repo := api.CloudControllerOrganizationRepository{}
-
-	orgs, err := repo.FindOrganizations(config)
+	orgs, err := o.organizationRepo.FindOrganizations(config)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
