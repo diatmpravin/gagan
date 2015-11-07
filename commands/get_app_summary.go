@@ -54,23 +54,3 @@ func (a *App) ApplicationSummary(app models.Application, w http.ResponseWriter, 
 	log.Printf("App status: %+v", app)
 	render.JSON(app)
 }
-
-// GetAppSummary GET details of particulat app
-// func GetAppSummary(w http.ResponseWriter, r *http.Request) {
-// 	render := &api.Render{r, w}
-
-// 	config := configuration.GetDefaultConfig()
-// 	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
-// 		http.Error(w, err.Error(), http.StatusBadRequest)
-// 	}
-
-// 	appName := r.URL.Query().Get("appname")
-// 	repo := api.CloudControllerApplicationRepository{}
-// 	app, err := repo.FindByName(config, appName)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 	}
-
-// 	log.Printf("Detials of a app: %+v", app)
-// 	render.JSON(app)
-// }
