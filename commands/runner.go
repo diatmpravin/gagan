@@ -33,6 +33,7 @@ func (runner Runner) Run(w http.ResponseWriter, r *http.Request, cmd Command) (e
 	for _, requirement := range requirements {
 		err = requirement.Execute(config)
 		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 	}

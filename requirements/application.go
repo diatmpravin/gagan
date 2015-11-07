@@ -1,6 +1,8 @@
 package requirements
 
 import (
+	"errors"
+	"fmt"
 	"github.com/diatmpravin/gagan/api"
 	"github.com/diatmpravin/gagan/configuration"
 	"github.com/diatmpravin/gagan/models"
@@ -23,11 +25,11 @@ func NewApplicationRequirement(name string, config *configuration.Configuration,
 }
 
 func (req *ApplicationRequirement) Execute(config *configuration.Configuration) (err error) {
+	log.Printf("++++++++++++++++++++++ req ++++++++++++++++++++++++> %+v", req.config)
 	req.Application, err = req.appRepo.FindByName(config, req.name)
 	if err != nil {
-		// FIXME
-		// req.ui.Failed("", err)
-		log.Printf("++++++++++++++++++++++ ERROR ++++++++++++++++++++++++> %+v", err)
+		log.Printf("Request failed: %+v", err)
+		err = errors.New(fmt.Sprintf("Request failed: %s", err))
 	}
 	return
 }
