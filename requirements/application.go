@@ -25,7 +25,6 @@ func NewApplicationRequirement(name string, config *configuration.Configuration,
 }
 
 func (req *ApplicationRequirement) Execute(config *configuration.Configuration) (err error) {
-	log.Printf("++++++++++++++++++++++ req ++++++++++++++++++++++++> %+v", req.config)
 	req.Application, err = req.appRepo.FindByName(config, req.name)
 	if err != nil {
 		log.Printf("Request failed: %+v", err)
