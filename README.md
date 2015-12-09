@@ -36,13 +36,38 @@ cURL
 
 * List All Organizations
 
+API endpoint:
+
+    /listallorganizations
+
+cURL
+
+    curl "http://localhost:8080/listallorganizations" -d '{"AccessToken":"TOKEN"}' -X POST -H "Content-Type: application/json"
+
 ### Space
 
 * List All Spaces
+ 
+API endpoint:
+
+    /listallspaces
+
+cURL
+
+    curl "http://localhost:8080/listallspaces" -d '{"AccessToken":"TOKEN","Organization":{"Name":"ORGANIZATION-NAME","Guid":"ORGANIZATION-GUID"}}' -X POST -H "Content-Type: application/json"
 
 ### App
 
 * List All Apps
+
+API endpoint:
+
+    /listallapps
+
+cURL
+
+    curl "http://localhost:8080/listallapps" -d '{"AccessToken":"TOKEN","Organization":{"Name":"ORGANIZATION-NAME","Guid":"ORGANIZATION-GUID"},"Space":{"Name":"SPACE-NAME","Guid":"SPACE-GUID","Applications":null,"ServiceInstances":null}}' -X POST -H "Content-Type: application/json"
+
 * Creating An App
 * Get App Summary
 * Stoping An App
