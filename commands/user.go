@@ -63,6 +63,7 @@ func SessionPostCase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Configuration: %+v", config)
-	render.JSON(config)
+	session := configuration.CreateSession(config)
+	log.Printf("Session: %+v", session)
+	render.JSON(session)
 }

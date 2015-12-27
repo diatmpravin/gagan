@@ -5,6 +5,7 @@ import (
 )
 
 type Configuration struct {
+	SessionId             int `json:"sessionid"`
 	Target                string
 	ApiVersion            string
 	AuthorizationEndpoint string
