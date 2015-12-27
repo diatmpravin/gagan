@@ -63,3 +63,18 @@ func CreateSession(config *Configuration) (session Session) {
 	log.Println("GET ", reply)
 	return
 }
+
+func DeleteSession(id int) {
+
+	c := RedisConnect()
+	defer c.Close()
+
+	reply, err := c.Do("DEL", "user:"+strconv.Itoa(id))
+	HandleError(err)
+
+	if reply.(int64) != 1 {
+		log.Println("No session removed")
+	} else {
+		log.Println("Session removed")
+	}
+}

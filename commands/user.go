@@ -7,6 +7,7 @@ import (
 	"github.com/diatmpravin/gagan/configuration"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type Login struct {
@@ -66,4 +67,17 @@ func SessionPostCase(w http.ResponseWriter, r *http.Request) {
 	session := configuration.CreateSession(config)
 	log.Printf("Session: %+v", session)
 	render.JSON(session)
+}
+
+func SessionDeleteCase(w http.ResponseWriter, r *http.Request) {
+	render := &api.Render{r, w}
+
+	id := r.URL.Query().Get("sessionid")
+	sessionId, _ := strconv.Atoi(id)
+
+	configuration.DeleteSession(sessionId)
+
+	res := map[string]string{"message": "Session deleted successfully"}
+	log.Printf("Session: %+v", res)
+	render.JSON(res)
 }
