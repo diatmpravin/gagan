@@ -7,6 +7,7 @@ import (
 	"github.com/diatmpravin/gagan/requirements"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type SpaceList struct {
@@ -29,9 +30,28 @@ func (s SpaceList) Run(w http.ResponseWriter, r *http.Request) {
 	render := &api.Render{r, w}
 
 	config := configuration.GetDefaultConfig()
-	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
+
+	session := configuration.Session{}
+
+	if err := json.NewDecoder(r.Body).Decode(&session); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+
+	config.Organization.Name = session.Organization.Name
+	config.Organization.Guid = session.Organization.Guid
+
+	c := configuration.RedisConnect()
+	defer c.Close()
+
+	reply, err := c.Do("GET", "user:"+strconv.Itoa(session.SessionId))
+
+	configuration.HandleError(err)
+
+	if err = json.Unmarshal(reply.([]byte), &session); err != nil {
+		panic(err)
+	}
+
+	config.AccessToken = session.AccessToken
 
 	spaces, err := s.spaceRepo.FindAllSpaces(config)
 	if err != nil {
