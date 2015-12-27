@@ -12,7 +12,7 @@ import (
 
 type Session struct {
 	SessionId int `json:"sessionid"`
-	// AccessToken  string    `json:"accesstoken"`
+	AccessToken  string    `json:"accesstoken"`
 	Timestamp    time.Time `json:"timestamp"`
 	Organization models.Organization
 	Space        models.Space
