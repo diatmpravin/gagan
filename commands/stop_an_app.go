@@ -8,6 +8,7 @@ import (
 	"github.com/diatmpravin/gagan/requirements"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type Stop struct {
@@ -26,10 +27,28 @@ func NewStop(config *configuration.Configuration, appRepo api.ApplicationReposit
 
 func (s *Stop) GetRequirements(reqFactory requirements.Factory, w http.ResponseWriter, r *http.Request) (reqs []Requirement, config *configuration.Configuration, err error) {
 	config = configuration.GetDefaultConfig()
-	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
+	session := configuration.Session{}
+
+	if err := json.NewDecoder(r.Body).Decode(&session); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
+	config.Organization.Name = session.Organization.Name
+	config.Organization.Guid = session.Organization.Guid
+	config.Space.Name = session.Space.Name
+	config.Space.Guid = session.Space.Guid
+
+	c := configuration.RedisConnect()
+	defer c.Close()
+
+	reply, err := c.Do("GET", "user:"+strconv.Itoa(session.SessionId))
+	configuration.HandleError(err)
+
+	if err = json.Unmarshal(reply.([]byte), &session); err != nil {
+		panic(err)
+	}
+
+	config.AccessToken = session.AccessToken
 	s.config = config
 
 	appName := r.URL.Query().Get("appname")
