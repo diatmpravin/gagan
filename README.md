@@ -32,6 +32,18 @@ cURL
 
     curl "http://localhost:8080/session/new" -d '{"email":"pravinmishra_88@yahoo.com","password":"cf@rest12"}' -X POST -H "Content-Type: application/json"
 
+* Delete Session
+
+API endpoint:
+
+    /session/delete
+
+cURL
+
+    curl "http://localhost:8080/session/delete?sessionid=8" -X DELETE -H "Content-Type: application/json"
+
+
+
 ### Organization
 
 * List All Organizations
