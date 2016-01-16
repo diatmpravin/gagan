@@ -42,7 +42,7 @@ API endpoint:
 
 cURL
 
-    curl "http://localhost:8080/listallorganizations" -d '{"AccessToken":"TOKEN"}' -X POST -H "Content-Type: application/json"
+    curl "http://localhost:8080/listallorganizations" -d '{"sessionid":20}' -X POST -H "Content-Type: application/json"
 
 ### Space
 
@@ -54,7 +54,7 @@ API endpoint:
 
 cURL
 
-    curl "http://localhost:8080/listallspaces" -d '{"AccessToken":"TOKEN","Organization":{"Name":"ORGANIZATION-NAME","Guid":"ORGANIZATION-GUID"}}' -X POST -H "Content-Type: application/json"
+    curl "http://localhost:8080/listallspaces" -d '{"sessionid":20,"timestamp":"2016-01-16T16:49:16.2528982+05:30","Organization":{"Name":"diatm1","Guid":"a2dd3cd3-d85b-4fe4-8c53-8fb57da4aafb"}}' -X POST -H "Content-Type: application/json"
 
 ### App
 
@@ -66,7 +66,7 @@ API endpoint:
 
 cURL
 
-    curl "http://localhost:8080/listallapps" -d '{"AccessToken":"TOKEN","Organization":{"Name":"ORGANIZATION-NAME","Guid":"ORGANIZATION-GUID"},"Space":{"Name":"SPACE-NAME","Guid":"SPACE-GUID","Applications":null,"ServiceInstances":null}}' -X POST -H "Content-Type: application/json"
+    curl "http://localhost:8080/listallapps" -d '{"sessionid":20,"accesstoken":"","timestamp":"2016-01-16T16:49:16.2528982+05:30","Organization":{"Name":"diatm1","Guid":"a2dd3cd3-d85b-4fe4-8c53-8fb57da4aafb"},"Space":{"Name":"development","Guid":"25cd438e-e0b3-476c-8998-261b9f8e807c","Applications":null,"ServiceInstances":null}}' -X POST -H "Content-Type: application/json"
 
 * Creating An App
 * Get App Summary
