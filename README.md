@@ -4,7 +4,7 @@ Gagan is a Golang package that provides a REST client for the Cloud Foundry REST
 
 ## Sample application
 
-We are developing a open source dashboard Aakash for cloudfoudry by using this REST API.
+We are developing a open source dashboard [Aakash](https://github.com/diatmpravin/aakash) for cloudfoudry by using this REST API.
 
 ## Development tools
 
