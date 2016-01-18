@@ -60,7 +60,7 @@ func SessionPostCase(w http.ResponseWriter, r *http.Request) {
 	l := Login{}
 	config, err := l.PutUser(&u)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Username and password do not match", http.StatusUnauthorized)
 		return
 	}
 
