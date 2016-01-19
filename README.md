@@ -120,7 +120,25 @@ cURL
     curl "http://localhost:8080/startinganapp?appname=APPNAME" -d '{"sessionid":20,"accesstoken":"","timestamp":"2016-01-16T16:49:16.2528982+05:30","Organization":{"Name":"diatm1","Guid":"a2dd3cd3-d85b-4fe4-8c53-8fb57da4aafb"},"Space":{"Name":"development","Guid":"25cd438e-e0b3-476c-8998-261b9f8e807c","Applications":null,"ServiceInstances":null}}' -X POST -H "Content-Type: application/json"
 
 * Delete a Praticular App
+
+API endpoint:
+
+    /deleteapraticularapp?appname=APPNAME
+
+cURL
+
+    curl "http://localhost:8080/deleteapraticularapp?appname=APPNAME" -d '{"sessionid":20,"accesstoken":"","timestamp":"2016-01-16T16:49:16.2528982+05:30","Organization":{"Name":"diatm1","Guid":"a2dd3cd3-d85b-4fe4-8c53-8fb57da4aafb"},"Space":{"Name":"development","Guid":"25cd438e-e0b3-476c-8998-261b9f8e807c","Applications":null,"ServiceInstances":null}}' -X POST -H "Content-Type: application/json"
+
 * Get The Instance Information
+
+API endpoint:
+
+    /gettheinstanceinformation?appname=APPNAME
+
+cURL
+
+    curl "http://localhost:8080/gettheinstanceinformation?appname=APPNAME" -d '{"sessionid":20,"accesstoken":"","timestamp":"2016-01-16T16:49:16.2528982+05:30","Organization":{"Name":"diatm1","Guid":"a2dd3cd3-d85b-4fe4-8c53-8fb57da4aafb"},"Space":{"Name":"development","Guid":"25cd438e-e0b3-476c-8998-261b9f8e807c","Applications":null,"ServiceInstances":null}}' -X POST -H "Content-Type: application/json"
+
 * Retrieve Particular App Usage Event
 
 ### Service

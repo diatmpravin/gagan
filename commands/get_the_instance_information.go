@@ -24,11 +24,13 @@ func NewInstanceInformation(config *configuration.Configuration, appRepo api.App
 }
 
 func (i *InstanceInformation) GetRequirements(reqFactory requirements.Factory, w http.ResponseWriter, r *http.Request) (reqs []Requirement, config *configuration.Configuration, err error) {
-	config = configuration.GetDefaultConfig()
-	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
+	session := configuration.Session{}
+
+	if err := json.NewDecoder(r.Body).Decode(&session); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
+	config = configuration.GetConfig(session)
 	i.config = config
 
 	appName := r.URL.Query().Get("appname")
