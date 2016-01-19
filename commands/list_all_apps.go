@@ -7,7 +7,6 @@ import (
 	"github.com/diatmpravin/gagan/requirements"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 type Apps struct {
@@ -28,32 +27,13 @@ func (a Apps) GetRequirements(reqFactory requirements.Factory, w http.ResponseWr
 
 func (a Apps) Run(w http.ResponseWriter, r *http.Request) {
 	render := &api.Render{r, w}
-
-	config := configuration.GetDefaultConfig()
-
 	session := configuration.Session{}
 
 	if err := json.NewDecoder(r.Body).Decode(&session); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	config.Organization.Name = session.Organization.Name
-	config.Organization.Guid = session.Organization.Guid
-	config.Space.Name = session.Space.Name
-	config.Space.Guid = session.Space.Guid
-
-	c := configuration.RedisConnect()
-	defer c.Close()
-
-	reply, err := c.Do("GET", "user:"+strconv.Itoa(session.SessionId))
-
-	configuration.HandleError(err)
-
-	if err = json.Unmarshal(reply.([]byte), &session); err != nil {
-		panic(err)
-	}
-
-	config.AccessToken = session.AccessToken
+	config := configuration.GetConfig(session)
 
 	space, err := a.spaceRepo.GetSummary(config)
 	if err != nil {

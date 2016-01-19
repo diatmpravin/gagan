@@ -11,7 +11,7 @@ import (
 )
 
 type Session struct {
-	SessionId int `json:"sessionid"`
+	SessionId    int       `json:"sessionid"`
 	AccessToken  string    `json:"accesstoken"`
 	Timestamp    time.Time `json:"timestamp"`
 	Organization models.Organization
@@ -77,4 +77,27 @@ func DeleteSession(id int) {
 	} else {
 		log.Println("Session removed")
 	}
+}
+
+func GetConfig(s Session) *Configuration {
+	config := GetDefaultConfig()
+
+	config.Organization.Name = s.Organization.Name
+	config.Organization.Guid = s.Organization.Guid
+	config.Space.Name = s.Space.Name
+	config.Space.Guid = s.Space.Guid
+
+	c := RedisConnect()
+	defer c.Close()
+
+	reply, err := c.Do("GET", "user:"+strconv.Itoa(s.SessionId))
+	HandleError(err)
+
+	if err = json.Unmarshal(reply.([]byte), &s); err != nil {
+		panic(err)
+	}
+
+	config.AccessToken = s.AccessToken
+
+	return config
 }
